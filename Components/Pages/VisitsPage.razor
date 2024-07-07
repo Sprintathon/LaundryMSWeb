@@ -1,0 +1,95 @@
+@page "/visits"
+@rendermode @(new InteractiveServerRenderMode(prerender : false))
+@inject VisitService visitService
+@inject ResourceService resourceService
+@inject MemberService memberService
+<h1>Visits</h1>
+
+<form>
+    <div class="row">
+        <div class="col-4">
+            <select class="form-control" @bind="newVisit.MemberId">
+                <option disabled>Select Member</option>
+                @foreach(var member in members)
+                {
+                    <option value="@member.Id">@member.Name - @member.IdentificationNumber</option>
+                }
+            </select>
+        </div>
+        <div class="col-4">
+             <select class="form-control" @bind="resourceId">
+                <option disabled>Select Resource</option>
+                @foreach(var resource in resources)
+                {
+                    <option value= "@resource.Id">@resource.Name</option>
+                }
+            </select>
+            <button type="button" class="btn btn-success col-12" @onclick="AddToResourceBasket">Add</button>
+        </div>
+
+        <div class="col-4">
+             <ul>
+                @foreach(var resource in newVisit.VisitResources ?? new List<Resource>()){
+                    <li>@resource.Name</li>
+                }
+             </ul>
+        </div>
+
+    </div>
+            <button type="button" class="btn btn-success col-12" @onclick="AddVisit">Add Visit</button>
+
+</form>
+
+
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Id</th>
+      <th scope="col">Date</th>
+      <th scope="col">Member</th>
+      <th scope="col">Resources</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach(var visit in visits){
+        <tr>
+            <th scope="row">@visit.Id</th>
+            <td>@visit.CreatedAt</td>
+            <td>@visit.Member?.Name</td>
+            <td>@visit.VisitResources.Count</td>
+            </tr>
+    }
+  </tbody>
+</table>
+
+
+@code {
+    public Visit newVisit = new Visit();
+    public List<Visit> visits = new List<Visit>();
+    public List<Member> members = new List<Member>();
+    public List<Resource> resources = new List<Resource>();
+    int resourceId = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        members = memberService.Get();
+        resources = resourceService.Get(); 
+        await Task.Delay(0);
+    }
+
+    void AddToResourceBasket(){
+        newVisit.VisitResources.Add(resources.First(x=>x.Id == resourceId));
+        StateHasChanged();
+    }
+
+    async Task AddVisit(){
+                //add to database 
+        await visitService.Post(newVisit);
+        visits = visitService.Get();
+        newVisit = new();
+        StateHasChanged();
+    }
+
+
+}

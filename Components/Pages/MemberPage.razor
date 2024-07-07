@@ -1,0 +1,82 @@
+@page "/members"
+@* @rendermode @(new InteractiveServerRenderMode(prerender : false)) *@
+@rendermode  InteractiveServer
+@inject MemberService memberService
+<h1>Members</h1>
+
+<form>
+    <div class="row">
+        <div class="col-3">
+            <label class="form-label">First Name</label>
+            <input type="text" class="form-control" @bind="member.FirstName"/>
+        </div>
+        <div class="col-3">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-control" @bind="member.LastName"/>
+        </div>
+        <div class="col-3">
+            <label class="form-label">Identification Number</label>
+            <input type="text" class="form-control" @bind="member.IdentificationNumber"/>
+        </div>
+        <div class="col-3">
+            <label class="form-label">Phone Number</label>
+            <input type="text" class="form-control" @bind="member.PhoneNumber"/>
+        </div>
+        <div class="col-3">
+            <label class="form-label">Date Of Birth</label>
+            <input type="date" class="form-control" @bind="member.DateOfBirth"/>
+        </div>
+        <div class="col-3">
+            <label class="form-label">Address</label>
+            <input type="text" class="form-control" @bind="member.Address"/>
+        </div>
+    </div>
+    <button type="button" class="btn btn-success col-12 my-2" @onclick="AddMember">Add Member</button> 
+</form>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Id</th>
+      <th scope="col">Name</th>
+      <th scope="col">IdentificationNumber</th>
+      <th scope="col">PhoneNumber</th>
+      <th scope="col">DateOfBirth</th>
+      <th scope="col">Address</th>
+      <th scope="col">Joined</th>
+      <th scope="col">Updated</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach(var member in members){
+        <tr>
+            <td>@member.Id</td>
+            <td>@member.Name</td>
+            <td>@member.IdentificationNumber</td>
+            <td>@member.PhoneNumber</td>
+            <td>@member.DateOfBirth</td>
+            <td>@member.Address</td>
+            <td>@member.CreatedAt</td>
+            <td>@member.UpdatedAt</td>
+        </tr>
+    }
+  
+  </tbody>
+</table>
+
+
+@code {
+    List<Member> members = new List<Member>();
+    Member member = new Member();
+    protected override void OnInitialized(){
+        members = memberService.Get();
+    }
+
+    public async Task AddMember(){
+        Console.WriteLine("Button Cliecked");
+        await memberService.Post(member);
+        members = memberService.Get();
+        member = new Member();
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,68 @@
+@page "/resources"
+@rendermode @(new InteractiveServerRenderMode(prerender : false))
+@inject ResourceService resourceService
+<h1>Resources</h1>
+
+<form>
+    <div class="row">
+        <div class="col-3">
+             <label class="form-label">Name</label>
+            <input type="text" class="form-control" @bind="newResource.Name">
+        </div>
+        <div class="col-3">
+             <label class="form-label">Quantity</label>
+            <input type="number" class="form-control" @bind="newResource.Quantity">
+        </div>
+        <div class="col-3">
+             <label class="form-label">Status</label>
+            <input type="number" class="form-control" @bind="newResource.Status">
+        </div>
+    </div>
+    <button type="button" class="btn btn-success col-12 my-2" @onclick="AddResource">Save</button>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Status</th>
+            <th>Created At</th>
+            <th>Updated At</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var resource in resources)
+        {
+            <tr>
+                <td>@resource.Id</td>
+                <td>@resource.Name</td>
+                <td>@resource.Quantity</td>
+                <td>@resource.Status</td>
+                <td>@resource.CreatedAt</td>
+                <td>@resource.UpdatedAt</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code{
+    public List<Resource> resources = new List<Resource>();
+    //this variable is used to add new resource to the resource list.
+    public Resource newResource = new Resource();
+
+    public async Task AddResource()
+    {
+        //add to database 
+        await resourceService.Post(newResource);
+        resources = resourceService.Get();
+        newResource = new();
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync(){
+        resources = resourceService.Get();
+    }
+}
